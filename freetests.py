@@ -40,9 +40,9 @@ import json
 
 world = dict()
 # set this to something sane 
-calls = 3000
+'''calls = 3000'''
 # ugh there's too much output? Well drop calls down
-# calls = 100
+calls = 100
 
 def utf8(utf8bytes):
     return utf8bytes.decode("utf-8")
@@ -117,6 +117,7 @@ if __name__ == '__main__':
         gws2.join(timeout=1)
         # here's our final test
         print("Counts: %s %s" % (ws.count , ws2.count))
+        print("What are the calls?",calls)
         assert ws.count == calls, ("Expected Responses were given! %d %d" % (ws.count, calls))
         assert ws2.count >= (9*calls/10), ("2nd Client got less than 9/10 of the results! %s" % ws2.count)
         print("Looks like the tests passed!")

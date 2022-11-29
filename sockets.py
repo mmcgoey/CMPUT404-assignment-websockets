@@ -26,6 +26,7 @@ app = Flask(__name__)
 sockets = Sockets(app)
 app.debug = True
 
+clients = list()
 class World:
     def __init__(self):
         self.clear()
@@ -59,10 +60,28 @@ class World:
     def world(self):
         return self.space
 
+def send_all(msg):
+    for client in clients:
+        client.put( msg )
+
+def send_all_json(obj):
+    send_all( json.dumps(obj) )
+class Client:
+    def __init__(self):
+        self.queue = queue.Queue()
+
+    def put(self, v):
+        self.queue.put_nowait(v)
+
+    def get(self):
+        return self.queue.get()
+
+
 myWorld = World()        
 
 def set_listener( entity, data ):
     ''' do something with the update ! '''
+    myWorld.set(entity=entity,data=data)
 
 myWorld.add_set_listener( set_listener )
         
@@ -71,17 +90,101 @@ def hello():
     '''Return something coherent here.. perhaps redirect to /static/index.html '''
     return redirect("http://127.0.0.1:5000/static/index.html")
 
+
 def read_ws(ws,client):
-    '''A greenlet function that reads from the websocket and updates the world'''
-    # XXX: TODO IMPLEMENT ME
-    return None
+    try:
+        while True:
+            msg = ws.receive()
+            print("WS RECV: %s" % msg)
+            if (msg is not None):
+                packet = json.loads(msg)
+                '''
+                for key in msg:
+                    client.update_listeners(key)
+                '''
+                send_all_json( packet )
+            else:
+                break
+    except:
+        '''Done'''
+
+    '''
+    while True:
+        data = ws.receive()
+        if data is not None:
+            print("Is this being called?")
+            packet = json.loads(data)
+            for key in packet:
+                myWorld.set(entity=key,data=packet[key])
+               
+        else:
+            break
+    '''
+
 
 @sockets.route('/subscribe')
 def subscribe_socket(ws):
     '''Fufill the websocket URL of /subscribe, every update notify the
        websocket and read updates from the websocket '''
-    # XXX: TODO IMPLEMENT ME
-    return None
+    client = Client()
+    clients.append(client)
+    g = gevent.spawn( read_ws, ws, client)
+    print("Subscribing")
+    try:
+        while True:
+            # block here
+            msg = client.get()
+            print("Got a message!")
+            ws.send(msg)
+    except Exception as e:# WebSocketError as e:
+        print("WS Error %s" % e)
+    finally:
+        clients.remove(client)
+        gevent.kill(g)
+    '''
+    while True:
+        data = ws.receive()
+        if data is not None:
+            print("Is this being called?")
+            packet = json.loads(data)
+            for key in packet:
+                set_listener(key,packet[key])
+            ws.send(packet)      
+        else:
+            break
+    '''
+
+    '''
+    while True:
+        data = ws.receive()
+        print("What is data?",data)
+        ws.send(data)
+        
+        if data is not None:
+            print("Is this being called?")
+            packet = json.loads(data)
+            myWorld.update_listeners(packet)     
+        else:
+            break
+    '''
+        
+    '''
+    mynewWorld = World()
+    g = gevent.spawn( read_ws, ws, mynewWorld)
+    print("Subscribing")
+    try:
+        while True:
+            # block here
+            get_entity_msg = myWorld.get()
+            print("Got a message!")
+            ws.send(get_entity_msg)
+    except Exception as e:# WebSocketError as e:
+        print("WS Error %s" % e)
+    finally:
+        gevent.kill(g)
+    '''
+
+    
 
 
 # I give this to you, this is how you get the raw body/data portion of a post in flask

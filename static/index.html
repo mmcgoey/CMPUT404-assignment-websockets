@@ -59,6 +59,7 @@ function drawCircle(context,entity) {
     }
 }
 
+
 function prepEntity(entity) {
     if (!entity["colour"]) {
         entity["colour"] = "#FF0000";
@@ -248,11 +249,22 @@ function update() {
     drawFrame();
 }
 
+function draw_stuff(json_data){
+    clearFrame();
+    for (var key in json_data) {
+        var entity = json_data[key];
+        drawCircle(context,prepEntity(entity));
+    }
+        
+       
+}
 
 function wsSetup() {
     var url = "ws://"+host+"/subscribe";   
     socket = new WebSocket(url);
     socket.onopen = function() {
+        console.log("Connection established");
+        //socket.send('Hello Server!');
         //XXX: TODO What are you going to do here?
     };
     socket.onerror = function(msg) {
@@ -260,8 +272,11 @@ function wsSetup() {
     };
     socket.onmessage = function(msg) {  
         try {
-            debug("WebSocket Recv:" + msg.data);
-            //XXX: TODO What are you going to do here?            
+            //debug("WebSocket Recv:" + msg.data);
+            const new_msg = JSON.parse(msg.data);
+            draw_stuff(new_msg)
+            //XXX: TODO What are you going to do here? 
+            //socket.send(JSON.stringify(msg.data));           
         } catch (e) {
             alert("socket on message: " + e);
         }
