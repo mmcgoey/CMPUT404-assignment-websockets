@@ -11,7 +11,8 @@ Make a shared state Websockets drawing program
 CITATIONS/ EXTERNAL SOURCE CODE
 ========================
 IMPORTANT EXTERNAL CODE USED:
-I used code from Abram Hindles chat.py and broadcaster.py for my sockets.py program
+I used code from Abram Hindles chat.py and broadcaster.py provided to us in the CMPUT 404 class notes.
+I used some of the code from chat.py for my sockets.py program
 The code was taken from this repository in the chat.py and broadcaster.py programs
 https://github.com/uofa-cmput404/cmput404-slides/tree/master/examples/WebSocketsExamples
 
