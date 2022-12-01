@@ -17,6 +17,10 @@ https://github.com/uofa-cmput404/cmput404-slides/tree/master/examples/WebSockets
 
 Specifically I used the Client class, the read_ws, subscribe_socket, send_all, and send_all_json methods with slight modifications to update the world
 
+I also reused some code from my assignment 4 submission linked here https://github.com/mmcgoey/CMPUT404-assignment-ajax
+Specifically I reused the update, world, get_entity, clear functions from my assignment 4 submission for sockets.py
+I also reused some of the code I wrote in the update() function in assignment 4 for getting the world using xmlhttp get
+
 Citations: 
 The only other resouce I referred to was this website https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API/Writing_WebSocket_client_applications
 
@@ -32,13 +36,13 @@ pip install -r requirements.txt
 Contributors / Licensing
 ========================
 
-Generally everything is LICENSE'D under the Apache 2 license by Abram Hindle.
+Generally everything is LICENSE'D under the Apache 2 license by Abram Hindle and Mark McGoey.
 
 freetests.py is LICENSE'D under a BSD-like license:
 
 From ws4py
 
-Copyright (c) 2011-2014, Sylvain Hellegouarch, Abram Hindle
+Copyright (c) 2022, Sylvain Hellegouarch, Abram Hindle, Mark McGoey
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

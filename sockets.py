@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
-# Copyright (c) 2013-2014 Abram Hindle
+# Copyright (c) 20122 Abram Hindle and Mark McGoey
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -60,13 +60,33 @@ class World:
     def world(self):
         return self.space
 
+'''
+CITATIONS:
+This citation is also in the README.md
+IMPORTANT: The send_all, send_all_json and the Client class are from the following repository provided by Abram Hindle
+The subsrcibe_socket and read_ws are also taken from this program with slight modifications to update the world
+https://github.com/uofa-cmput404/cmput404-slides/blob/master/examples/WebSocketsExamples/chat.py
+'''
+
 def send_all(msg):
+    '''
+    Note this function is taken from the following program provided by Abram Hindle
+    https://github.com/uofa-cmput404/cmput404-slides/blob/master/examples/WebSocketsExamples/chat.py
+    '''
     for client in clients:
         client.put( msg )
 
 def send_all_json(obj):
+    '''
+    Note this function is taken from the following program provided by Abram Hindle
+    https://github.com/uofa-cmput404/cmput404-slides/blob/master/examples/WebSocketsExamples/chat.py
+    '''
     send_all( json.dumps(obj) )
 class Client:
+    '''
+    Note this class is taken from the following program provided by Abram Hindle
+    https://github.com/uofa-cmput404/cmput404-slides/blob/master/examples/WebSocketsExamples/chat.py
+    '''
     def __init__(self):
         self.queue = queue.Queue()
 
@@ -93,14 +113,18 @@ def hello():
 
 def read_ws(ws,client):
     '''A greenlet function that reads from the websocket and updates the world'''
+    '''
+    Note this function is taken from the following program provided by Abram Hindle
+    https://github.com/uofa-cmput404/cmput404-slides/blob/master/examples/WebSocketsExamples/chat.py
+    '''
     try:
         while True:
             msg = ws.receive()
             print("WS RECV: %s" % msg)
             if (msg is not None):
                 packet = json.loads(msg)
-                for key in packet:
-                    myWorld.set(entity=key,data=packet[key])
+                for entity in packet:
+                    myWorld.set(entity=entity,data=packet[entity])
                 send_all_json( packet )
                 
             else:
@@ -115,6 +139,10 @@ def read_ws(ws,client):
 def subscribe_socket(ws):
     '''Fufill the websocket URL of /subscribe, every update notify the
        websocket and read updates from the websocket '''
+    '''
+    Note this function is taken from the following program provided by Abram Hindle
+    https://github.com/uofa-cmput404/cmput404-slides/blob/master/examples/WebSocketsExamples/chat.py
+    '''
     client = Client()
     clients.append(client)
     g = gevent.spawn( read_ws, ws, client)
