@@ -235,22 +235,18 @@ mouse.mousedowners.push(function(x,y,clicked,e) {
     var name = "X"+(counter++)%100;
     var msg = {[name]:{'x':x,'y':y,'colour':'blue','radius':5}};
     socket.send(JSON.stringify(msg));
-    drawCircle(context,prepEntity(msg));
 });
 
 mouse.mouseuppers.push(function(x,y,clicked,e) {
     var name = "X"+(counter++)%100;
     var msg = {[name]:{'x':x,'y':y,'colour':'blue','radius':5}};
-    socket.send(JSON.stringify(msg));
-    drawCircle(context,prepEntity(msg));
-    
+    socket.send(JSON.stringify(msg)); 
 });
 
 mouse.mousedraggers.push(function(x,y,clicked,e) {
     var name = "X"+(counter++)%100;
     var msg = {[name]:{'x':x,'y':y,'colour':'blue','radius':5}};
     socket.send(JSON.stringify(msg));
-    drawCircle(context,prepEntity(msg));
 });
 
 
