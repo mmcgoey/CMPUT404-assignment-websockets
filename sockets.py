@@ -34,7 +34,6 @@ class World:
         self.listeners = list()
         
     def add_set_listener(self, listener):
-        print("What are the listeners?",listener)
         self.listeners.append( listener )
 
     def update(self, entity, key, value):
@@ -79,28 +78,13 @@ class Client:
 
 
 myWorld = World()        
-'''
+
 def set_listener( entity, data ):
-    print("Do I enter set_listener")
-    #do something with the update !
-    #myWorld.set(entity=entity,data=data)
-    
-    #print("What is entity in set_listener?",entity)
-    #print("What is this entity get?",myWorld.get(entity=entity))
-    #myWorld.update_listeners(entity=entity)
-    print("What is the data for entity?",data)
-    
-    for key in data:
-        print("What is key?",data)
-        myWorld.update(entity=entity,key=key,value=data[key])
-    
-    
-    for thing in myWorld.world():
-        print("Is anything in the world updated?",thing)
-        #myWorld.set(entity=entity,data=data)
+    print(f"Entity {entity} updated with this data {data}")
+   
     
 myWorld.add_set_listener( set_listener )
-'''        
+      
 @app.route('/')
 def hello():
     '''Return something coherent here.. perhaps redirect to /static/index.html '''
@@ -108,29 +92,15 @@ def hello():
 
 
 def read_ws(ws,client):
-    print("Do I enter this function?")
+    '''A greenlet function that reads from the websocket and updates the world'''
     try:
-        print("What about noew")
         while True:
-            print("Now?")
             msg = ws.receive()
-            print("Is anything happening?")
             print("WS RECV: %s" % msg)
             if (msg is not None):
-                #packet = json.loads(msg)
-                #for key in packet:
-               #     print("What is key two?",key)
-               #     myWorld.update_listeners(key)
-                
                 packet = json.loads(msg)
-                print("Is anything happending?",packet)
-                print("What is msg?",msg)
-                #myWorld.update_listeners(packet)
-                
                 for key in packet:
-                    print("What is key two?",key)
-                    myWorld.update_listeners(key)
-                
+                    myWorld.set(entity=key,data=packet[key])
                 send_all_json( packet )
                 
             else:
@@ -138,18 +108,7 @@ def read_ws(ws,client):
     except:
         '''Done'''
 
-    '''
-    while True:
-        data = ws.receive()
-        if data is not None:
-            print("Is this being called?")
-            packet = json.loads(data)
-            for key in packet:
-                myWorld.set(entity=key,data=packet[key])
-               
-        else:
-            break
-    '''
+    
 
 
 @sockets.route('/subscribe')
@@ -159,66 +118,17 @@ def subscribe_socket(ws):
     client = Client()
     clients.append(client)
     g = gevent.spawn( read_ws, ws, client)
-    print("Subscribing")
     try:
         while True:
             # block here
             msg = client.get()
-            print("What is the msg???",msg)
-            print("Is client anything?",client)
-            print("Got a message!")
             ws.send(msg)
     except Exception as e:# WebSocketError as e:
         print("WS Error %s" % e)
     finally:
         clients.remove(client)
-        print("At the end did I add anything to world?",myWorld.world())
         gevent.kill(g)
-    '''
-    while True:
-        data = ws.receive()
-        if data is not None:
-            print("Is this being called?")
-            packet = json.loads(data)
-            for key in packet:
-                set_listener(key,packet[key])
-            ws.send(packet)      
-        else:
-            break
-    '''
-
-    '''
-    while True:
-        data = ws.receive()
-        print("What is data?",data)
-        ws.send(data)
-        
-        if data is not None:
-            print("Is this being called?")
-            packet = json.loads(data)
-            myWorld.update_listeners(packet)     
-        else:
-            break
-    '''
-        
-    '''
-    mynewWorld = World()
-    g = gevent.spawn( read_ws, ws, mynewWorld)
-    print("Subscribing")
-    try:
-        while True:
-            # block here
-            get_entity_msg = myWorld.get()
-            print("Got a message!")
-            ws.send(get_entity_msg)
-    except Exception as e:# WebSocketError as e:
-        print("WS Error %s" % e)
-    finally:
-        gevent.kill(g)
-    '''
-
-    
-
+  
 
 # I give this to you, this is how you get the raw body/data portion of a post in flask
 # this should come with flask but whatever, it's not my project.
@@ -247,9 +157,6 @@ def update(entity):
 @app.route("/world", methods=['POST','GET'])    
 def world():
     '''you should probably return the world here'''
-    print("Is the world anything?",myWorld.world)
-    for thing in myWorld.world():
-        print("What is the wrold",thing)
     return myWorld.world()
 
 @app.route("/entity/<entity>")    

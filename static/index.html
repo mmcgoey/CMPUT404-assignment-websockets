@@ -36,39 +36,6 @@ var H = canvas.height = window.innerHeight-50;
 var wscounter = 0;
 var socket;
 
-function sendJSONXMLHTTPRequest(url, objects, callback) {
-    
-    var xhr = new XMLHttpRequest();
-    xhr.open('POST',url,true);
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState==4) {
-            try {
-                if (xhr.status==200) {
-                    //XXX: parse some JSON from the request!
-                    var json_data = JSON.parse(xhr.responseText);
-                    //XXX: Pass the data to the callback!
-                    callback(json_data);
-                }
-            } 
-            catch(e) {
-                alert('Error: ' + e.name);
-            }
-        }
-    };
-    //XXX: POST to a URL
-    //XXX: set the mimetype and the accept headers!
-    // Remember to use application/json !
-    xhr.setRequestHeader("Accept", "application/json");
-    xhr.setRequestHeader('Content-Type', 'application/json');
-    xhr.setRequestHeader("Access-Control-Allow-Origin","http://127.0.0.1:8000");
-    xhr.send(JSON.stringify(objects));
-    
-    
-}
-function post_call_back(json_data){
-    console.log(json_data);
-}
-
 function debug(str) {
     var debugDiv = document.getElementById('debug');
     debugDiv.innerHTML = "" + str;
@@ -91,7 +58,6 @@ function drawCircle(context,entity) {
         stroke();                                
     }
 }
-
 
 function prepEntity(entity) {
     if (!entity["colour"]) {
@@ -157,17 +123,7 @@ function getPosition(e) {
 
 function addEntity(entity, data) {
     world[entity] = data;
-    console.log("What is world[entity]",world[entity])
-    var xhr = new XMLHttpRequest();
     drawNextFrame()
-    sendJSONXMLHTTPRequest("/entity/"+entity,world[entity],post_call_back)
-    
-    //console.log("What is message?",world[entity])
-    //connection.send(JSON.stringify(world[entity]));
-    //world[entity] = data;
-    //drawNextFrame(); 
-    
-    // (but should we?)
     //XXX: Send a XHTML Request that updates the entity you just modified!
 }
 var counter = 0;
@@ -276,37 +232,24 @@ mouse = (function() {
 // Add the application specific mouse listeners!
 //XXX: TODO Make these prettier!
 mouse.mousedowners.push(function(x,y,clicked,e) {
-    //addEntityWithoutName({'x':x,'y':y,'colour':'blue'});
     var name = "X"+(counter++)%100;
-    /*
-    addEntity(name,{'x':x,'y':y,'colour':'blue'});
-    */
-    var msg = {[name]:{'x':x,'y':y,'colour':'blue','radius':5}}
-    socket.send(JSON.stringify(msg))
+    var msg = {[name]:{'x':x,'y':y,'colour':'blue','radius':5}};
+    socket.send(JSON.stringify(msg));
     drawCircle(context,prepEntity(msg));
 });
 
 mouse.mouseuppers.push(function(x,y,clicked,e) {
-    //addEntityWithoutName({'x':x,'y':y,'colour':'blue'});
     var name = "X"+(counter++)%100;
-    /*
-    addEntity(name,{'x':x,'y':y,'colour':'blue'});
-    */
-    var msg = {[name]:{'x':x,'y':y,'colour':'blue','radius':5}}
-    socket.send(JSON.stringify(msg))
-    //clearFrame();
+    var msg = {[name]:{'x':x,'y':y,'colour':'blue','radius':5}};
+    socket.send(JSON.stringify(msg));
     drawCircle(context,prepEntity(msg));
     
 });
 
 mouse.mousedraggers.push(function(x,y,clicked,e) {
     var name = "X"+(counter++)%100;
-    /*
-    addEntity(name,{'x':x,'y':y,'colour':'blue',
-                          'radius':5});
-    */
-    var msg = {[name]:{'x':x,'y':y,'colour':'blue','radius':5}}
-    socket.send(JSON.stringify(msg))
+    var msg = {[name]:{'x':x,'y':y,'colour':'blue','radius':5}};
+    socket.send(JSON.stringify(msg));
     drawCircle(context,prepEntity(msg));
 });
 
@@ -319,6 +262,7 @@ function wsSetup() {
     var url = "ws://"+host+"/subscribe";   
     socket = new WebSocket(url);
     socket.onopen = function() {
+        //On open I am getting the data from the world and drawing it out
         console.log("Connection established");
         var xhr = new XMLHttpRequest();
         xhr.open("GET","http://127.0.0.1:8000/world",true);
@@ -328,7 +272,6 @@ function wsSetup() {
                 try {
                     if (xhr.status==200) {
                         var json_data = JSON.parse(xhr.responseText);
-                        console.log("Is json_data anything?",json_data)
                         clearFrame();
                         for (var key in json_data) {
                             var entity = json_data[key];
@@ -349,7 +292,7 @@ function wsSetup() {
     };
     socket.onmessage = function(msg) {  
         try {
-            //debug("WebSocket Recv:" + msg.data);
+            debug("WebSocket Recv:" + msg.data);
             const new_msg = JSON.parse(msg.data);
             for (var key in new_msg) {
                 addEntity(key,new_msg[key])
