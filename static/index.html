@@ -36,6 +36,39 @@ var H = canvas.height = window.innerHeight-50;
 var wscounter = 0;
 var socket;
 
+function sendJSONXMLHTTPRequest(url, objects, callback) {
+    
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST',url,true);
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState==4) {
+            try {
+                if (xhr.status==200) {
+                    //XXX: parse some JSON from the request!
+                    var json_data = JSON.parse(xhr.responseText);
+                    //XXX: Pass the data to the callback!
+                    callback(json_data);
+                }
+            } 
+            catch(e) {
+                alert('Error: ' + e.name);
+            }
+        }
+    };
+    //XXX: POST to a URL
+    //XXX: set the mimetype and the accept headers!
+    // Remember to use application/json !
+    xhr.setRequestHeader("Accept", "application/json");
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.setRequestHeader("Access-Control-Allow-Origin","http://127.0.0.1:8000");
+    xhr.send(JSON.stringify(objects));
+    
+    
+}
+function post_call_back(json_data){
+    console.log(json_data);
+}
+
 function debug(str) {
     var debugDiv = document.getElementById('debug');
     debugDiv.innerHTML = "" + str;
@@ -80,10 +113,10 @@ function clearFrame() {
 }
 
 // This actually draws the frame
-function renderFrame() {
+function renderFrame() {  
     clearFrame();
     for (var key in world) {
-        var entity = world[key];
+        var entity = world[key]
         drawCircle(context,prepEntity(entity));
     }
 }
@@ -124,13 +157,24 @@ function getPosition(e) {
 
 function addEntity(entity, data) {
     world[entity] = data;
-    drawNextFrame(); // (but should we?)
+    console.log("What is world[entity]",world[entity])
+    var xhr = new XMLHttpRequest();
+    drawNextFrame()
+    sendJSONXMLHTTPRequest("/entity/"+entity,world[entity],post_call_back)
+    
+    //console.log("What is message?",world[entity])
+    //connection.send(JSON.stringify(world[entity]));
+    //world[entity] = data;
+    //drawNextFrame(); 
+    
+    // (but should we?)
     //XXX: Send a XHTML Request that updates the entity you just modified!
 }
 var counter = 0;
 function addEntityWithoutName(data) {
     var name = "X"+(counter++)%100;
     addEntity(name,data);
+    return name
 }
 
 // canvas + mouse/touch is complicated 
@@ -232,16 +276,38 @@ mouse = (function() {
 // Add the application specific mouse listeners!
 //XXX: TODO Make these prettier!
 mouse.mousedowners.push(function(x,y,clicked,e) {
-    addEntityWithoutName({'x':x,'y':y,'colour':'blue'});
+    //addEntityWithoutName({'x':x,'y':y,'colour':'blue'});
+    var name = "X"+(counter++)%100;
+    /*
+    addEntity(name,{'x':x,'y':y,'colour':'blue'});
+    */
+    var msg = {[name]:{'x':x,'y':y,'colour':'blue','radius':5}}
+    socket.send(JSON.stringify(msg))
+    drawCircle(context,prepEntity(msg));
 });
 
 mouse.mouseuppers.push(function(x,y,clicked,e) {
-    addEntityWithoutName({'x':x,'y':y,'colour':'blue'});
+    //addEntityWithoutName({'x':x,'y':y,'colour':'blue'});
+    var name = "X"+(counter++)%100;
+    /*
+    addEntity(name,{'x':x,'y':y,'colour':'blue'});
+    */
+    var msg = {[name]:{'x':x,'y':y,'colour':'blue','radius':5}}
+    socket.send(JSON.stringify(msg))
+    //clearFrame();
+    drawCircle(context,prepEntity(msg));
+    
 });
 
 mouse.mousedraggers.push(function(x,y,clicked,e) {
-    addEntityWithoutName({'x':x,'y':y,'colour':'blue',
+    var name = "X"+(counter++)%100;
+    /*
+    addEntity(name,{'x':x,'y':y,'colour':'blue',
                           'radius':5});
+    */
+    var msg = {[name]:{'x':x,'y':y,'colour':'blue','radius':5}}
+    socket.send(JSON.stringify(msg))
+    drawCircle(context,prepEntity(msg));
 });
 
 
@@ -249,23 +315,34 @@ function update() {
     drawFrame();
 }
 
-function draw_stuff(json_data){
-    clearFrame();
-    for (var key in json_data) {
-        var entity = json_data[key];
-        drawCircle(context,prepEntity(entity));
-    }
-        
-       
-}
-
 function wsSetup() {
     var url = "ws://"+host+"/subscribe";   
     socket = new WebSocket(url);
     socket.onopen = function() {
         console.log("Connection established");
-        //socket.send('Hello Server!');
-        //XXX: TODO What are you going to do here?
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET","http://127.0.0.1:8000/world",true);
+    
+        xhr.onreadystatechange = function(){
+            if (xhr.readyState==4) {
+                try {
+                    if (xhr.status==200) {
+                        var json_data = JSON.parse(xhr.responseText);
+                        console.log("Is json_data anything?",json_data)
+                        clearFrame();
+                        for (var key in json_data) {
+                            var entity = json_data[key];
+                            drawCircle(context,prepEntity(entity));
+                        }   
+                    }
+                } 
+                catch(e) {
+                    alert('Error: ' + e.name);
+                }
+            } 
+        }
+    
+        xhr.send();
     };
     socket.onerror = function(msg) {
         debug("WebSocket Error:" + msg.data);
@@ -274,9 +351,10 @@ function wsSetup() {
         try {
             //debug("WebSocket Recv:" + msg.data);
             const new_msg = JSON.parse(msg.data);
-            draw_stuff(new_msg)
-            //XXX: TODO What are you going to do here? 
-            //socket.send(JSON.stringify(msg.data));           
+            for (var key in new_msg) {
+                addEntity(key,new_msg[key])
+            }
+            //XXX: TODO What are you going to do here?          
         } catch (e) {
             alert("socket on message: " + e);
         }

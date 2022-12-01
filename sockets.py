@@ -34,6 +34,7 @@ class World:
         self.listeners = list()
         
     def add_set_listener(self, listener):
+        print("What are the listeners?",listener)
         self.listeners.append( listener )
 
     def update(self, entity, key, value):
@@ -78,31 +79,60 @@ class Client:
 
 
 myWorld = World()        
-
+'''
 def set_listener( entity, data ):
-    ''' do something with the update ! '''
-    myWorld.set(entity=entity,data=data)
-
+    print("Do I enter set_listener")
+    #do something with the update !
+    #myWorld.set(entity=entity,data=data)
+    
+    #print("What is entity in set_listener?",entity)
+    #print("What is this entity get?",myWorld.get(entity=entity))
+    #myWorld.update_listeners(entity=entity)
+    print("What is the data for entity?",data)
+    
+    for key in data:
+        print("What is key?",data)
+        myWorld.update(entity=entity,key=key,value=data[key])
+    
+    
+    for thing in myWorld.world():
+        print("Is anything in the world updated?",thing)
+        #myWorld.set(entity=entity,data=data)
+    
 myWorld.add_set_listener( set_listener )
-        
+'''        
 @app.route('/')
 def hello():
     '''Return something coherent here.. perhaps redirect to /static/index.html '''
-    return redirect("http://127.0.0.1:5000/static/index.html")
+    return redirect("http://127.0.0.1:8000/static/index.html")
 
 
 def read_ws(ws,client):
+    print("Do I enter this function?")
     try:
+        print("What about noew")
         while True:
+            print("Now?")
             msg = ws.receive()
+            print("Is anything happening?")
             print("WS RECV: %s" % msg)
             if (msg is not None):
+                #packet = json.loads(msg)
+                #for key in packet:
+               #     print("What is key two?",key)
+               #     myWorld.update_listeners(key)
+                
                 packet = json.loads(msg)
-                '''
-                for key in msg:
-                    client.update_listeners(key)
-                '''
+                print("Is anything happending?",packet)
+                print("What is msg?",msg)
+                #myWorld.update_listeners(packet)
+                
+                for key in packet:
+                    print("What is key two?",key)
+                    myWorld.update_listeners(key)
+                
                 send_all_json( packet )
+                
             else:
                 break
     except:
@@ -134,12 +164,15 @@ def subscribe_socket(ws):
         while True:
             # block here
             msg = client.get()
+            print("What is the msg???",msg)
+            print("Is client anything?",client)
             print("Got a message!")
             ws.send(msg)
     except Exception as e:# WebSocketError as e:
         print("WS Error %s" % e)
     finally:
         clients.remove(client)
+        print("At the end did I add anything to world?",myWorld.world())
         gevent.kill(g)
     '''
     while True:
@@ -214,6 +247,9 @@ def update(entity):
 @app.route("/world", methods=['POST','GET'])    
 def world():
     '''you should probably return the world here'''
+    print("Is the world anything?",myWorld.world)
+    for thing in myWorld.world():
+        print("What is the wrold",thing)
     return myWorld.world()
 
 @app.route("/entity/<entity>")    
