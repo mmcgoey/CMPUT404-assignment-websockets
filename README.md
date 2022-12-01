@@ -11,8 +11,8 @@ Make a shared state Websockets drawing program
 CITATIONS/ EXTERNAL SOURCE CODE
 ========================
 IMPORTANT EXTERNAL CODE USED:
-I used code from Abram Hindles chat.py and broadcaster.py programs provided to us in the class notes 
-the code was taken from this repository in the chat.py and broadcaster.py programs
+I used code from Abram Hindles chat.py and broadcaster.py for my sockets.py program
+The code was taken from this repository in the chat.py and broadcaster.py programs
 https://github.com/uofa-cmput404/cmput404-slides/tree/master/examples/WebSocketsExamples
 
 Specifically I used the Client class, the read_ws, subscribe_socket, send_all, and send_all_json methods with slight modifications to update the world
