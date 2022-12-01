@@ -7,15 +7,6 @@ See requirements.org (plain-text) for a description of the project.
 
 Make a shared state Websockets drawing program
 
-Prereqs
-=======
-Create a virtual environment and install the required dependencies.
-
-```bash
-virtualenv venv --python=python3
-source venv/bin/activate
-pip install -r requirements.txt
-```
 
 CITATIONS/ EXTERNAL SOURCE CODE
 ========================
@@ -28,6 +19,16 @@ Specifically I used the Client class, the read_ws, subscribe_socket, send_all, a
 
 Citations: 
 The only other resouce I referred to was this website https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API/Writing_WebSocket_client_applications
+
+Prereqs
+=======
+Create a virtual environment and install the required dependencies.
+
+```bash
+virtualenv venv --python=python3
+source venv/bin/activate
+pip install -r requirements.txt
+```
 Contributors / Licensing
 ========================
 
