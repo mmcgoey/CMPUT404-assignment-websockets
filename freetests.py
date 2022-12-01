@@ -40,10 +40,10 @@ import json
 
 world = dict()
 # set this to something sane 
-'''calls = 3000'''
+calls = 3000
 # ugh there's too much output? Well drop calls down
 #calls = 100
-calls = 20
+
 def utf8(utf8bytes):
     return utf8bytes.decode("utf-8")
 
